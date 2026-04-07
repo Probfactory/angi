@@ -29,12 +29,16 @@ export async function fetchAllProducts(env: Env) {
   while (hasMore) {
     const resp = await zohoFetch(
       env,
-      `/products?per_page=200&page=${page}&show_in_storefront=true`
+      `/products?per_page=200&page=${page}`
     );
     const data = (await resp.json()) as any;
 
     if (data.products && data.products.length > 0) {
-      allProducts.push(...data.products);
+      // Only include products that have variants (proper products, not individual size entries)
+      const variantProducts = data.products.filter(
+        (p: any) => p.has_variant === true && p.variant_count > 1
+      );
+      allProducts.push(...variantProducts);
       page++;
       hasMore = data.products.length === 200;
     } else {
