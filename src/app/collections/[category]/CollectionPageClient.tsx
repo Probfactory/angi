@@ -4,8 +4,17 @@ import { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
-import { products, categories } from "@/data/products";
+import { ProductGridSkeleton } from "@/components/ProductSkeleton";
+import { useProducts } from "@/hooks/useProducts";
 import Link from "next/link";
+
+const defaultCategories = [
+  { name: "All", slug: "all" },
+  { name: "Tamil T-Shirts", slug: "tamil-t-shirts" },
+  { name: "Identity T-Shirts", slug: "identity-t-shirts" },
+  { name: "Hoodies", slug: "hoodies" },
+  { name: "Polo T-Shirts", slug: "polo-t-shirts" },
+];
 
 const sortOptions = [
   { label: "Newest", value: "newest" },
@@ -19,15 +28,14 @@ export default function CollectionPageClient() {
   const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
 
-  const currentCategory = categories.find((c) => c.slug === categorySlug);
-  const categoryName = currentCategory?.name || "All";
+  const { products, loading } = useProducts(categorySlug);
 
-  const filteredProducts = useMemo(() => {
-    let result =
-      categorySlug === "all"
-        ? [...products]
-        : products.filter((p) => p.categorySlug === categorySlug);
+  const categoryName =
+    defaultCategories.find((c) => c.slug === categorySlug)?.name ||
+    categorySlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
+  const sorted = useMemo(() => {
+    const result = [...products];
     switch (sortBy) {
       case "price-asc":
         result.sort((a, b) => a.price - b.price);
@@ -37,7 +45,7 @@ export default function CollectionPageClient() {
         break;
     }
     return result;
-  }, [categorySlug, sortBy]);
+  }, [products, sortBy]);
 
   return (
     <div>
@@ -46,16 +54,15 @@ export default function CollectionPageClient() {
         <h1 className="text-[14px] tracking-[0.15em] font-light text-[#111]">
           {categoryName}{" "}
           <span className="text-[11px] text-[#bbb] ml-1">
-            {filteredProducts.length}
+            {loading ? "" : sorted.length}
           </span>
         </h1>
       </div>
 
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 lg:px-6 pb-4">
-        {/* Category Nav */}
         <div className="flex items-center gap-4 overflow-x-auto scrollbar-none">
-          {categories.map((cat) => (
+          {defaultCategories.map((cat) => (
             <Link
               key={cat.slug}
               href={`/collections/${cat.slug}`}
@@ -120,7 +127,7 @@ export default function CollectionPageClient() {
             <div>
               <p className="text-[9px] tracking-[0.2em] uppercase text-[#bbb] mb-2">Price</p>
               <div className="space-y-1.5">
-                {["Under ₹1,000", "₹1,000 - ₹2,000", "₹2,000+"].map((r) => (
+                {["Under ₹500", "₹500 - ₹1,000", "₹1,000+"].map((r) => (
                   <button key={r} className="block text-[10px] text-[#999] hover:text-[#111] transition-colors duration-300">
                     {r}
                   </button>
@@ -131,16 +138,18 @@ export default function CollectionPageClient() {
         </div>
       )}
 
-      {/* Product Grid — Edge to Edge, 1px gap */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[1px] bg-[#f0f0f0]">
-        {filteredProducts.map((product) => (
-          <div key={product.id} className="bg-white">
-            <ProductCard product={product} />
-          </div>
-        ))}
-      </div>
-
-      {filteredProducts.length === 0 && (
+      {/* Product Grid */}
+      {loading ? (
+        <ProductGridSkeleton count={8} />
+      ) : sorted.length > 0 ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[1px] bg-[#f0f0f0]">
+          {sorted.map((product) => (
+            <div key={product.id} className="bg-white">
+              <ProductCard product={product} />
+            </div>
+          ))}
+        </div>
+      ) : (
         <div className="text-center py-20">
           <p className="text-[12px] text-[#999]">No products found.</p>
           <Link

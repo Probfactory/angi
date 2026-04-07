@@ -1,0 +1,14 @@
+name = "angi-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+ZOHO_ORG_ID = "660410685"
+ZOHO_ACCOUNTS_URL = "https://accounts.zoho.com"
+ZOHO_API_BASE = "https://www.zohoapis.com/commerce/v1"
+ALLOWED_ORIGIN = "https://angi-4g1.pages.dev"
+
+# Secrets (set via `wrangler secret put`):
+# ZOHO_CLIENT_ID
+# ZOHO_CLIENT_SECRET
+# ZOHO_REFRESH_TOKEN

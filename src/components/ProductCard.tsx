@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { Product } from "@/data/products";
+import { Product } from "@/lib/api";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
