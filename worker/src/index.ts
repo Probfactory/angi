@@ -12,7 +12,7 @@ function getCorsHeaders(origin: string, allowedOrigin: string) {
     "http://localhost:3000",
     "http://localhost:3001",
   ];
-  const matched = allowed.includes(origin) ? origin : allowedOrigin || "*";
+  const matched = !origin ? "*" : allowed.includes(origin) ? origin : allowedOrigin || "*";
 
   return {
     "Access-Control-Allow-Origin": matched,
